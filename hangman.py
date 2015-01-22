@@ -59,12 +59,33 @@ HANGMANPICS = ['''
  / \  |
       |
 =========''']
-words = 'ant baboon badger bat bear beaver camel cat clam cobra cougar coyote crow deer dog donkey duck eagle ferret fox frog goat goose hawk lion lizard llama mole monkey moose mouse mule newt otter owl panda parrot pigeon python rabbit ram rat raven rhino salmon seal shark sheep skunk sloth snake spider stork swan tiger toad trout turkey turtle weasel whale wolf wombat zebra'.split()
+
+def readWordList():
+    fp = open('test.txt', 'r')
+    words = fp.read().split()
+    return words
 
 def getRandomWord(wordList):
     # This function returns a random string from the passed list of strings.
     wordIndex = random.randint(0, len(wordList) - 1)
     return wordList[wordIndex]
+
+def countScore(correctLetters, secretWord):
+    score = 0
+    for i in range(len(secretWord)):
+        if secretWord[i] in correctLetters:
+            score += 10
+    return score
+
+def bestScore(score):
+    rf = open('score.txt', 'r')
+    best = rf.read()
+    if score > int(best):
+        wf = open('score.txt', 'w')
+        wf.write(str(score))
+        return score
+    return int(best)
+
 
 def displayBoard(HANGMANPICS, missedLetters, correctLetters, secretWord):
     print(HANGMANPICS[len(missedLetters)])
@@ -123,12 +144,14 @@ def checkWrongAnswer(missedLetters, secretWord):
             
 def main():
     """Main application entry point."""
-    print('Play ((H A N G M A N)) game with YulMOO!')
+    print('Hello Hangman with YulChi')
     missedLetters = ''
     correctLetters = ''
     gameSucceeded = False
     gameFailed = False
-    secretWord = getRandomWord(words)
+    secretWord = getRandomWord(readWordList())
+    print('Best score is ', end='')
+    print(bestScore(countScore(correctLetters, secretWord)))
 
     while True:
         displayBoard(HANGMANPICS, missedLetters, correctLetters, secretWord)
@@ -139,13 +162,18 @@ def main():
             else:
                 print('You have run out of guesses!\nAfter ' + str(len(missedLetters)) + ' missed guesses and ' + str(len(correctLetters)) + ' correct guesses, the word was "' + secretWord + '"')
 
+            print('Your score is ', end='')
+            print(countScore(correctLetters, secretWord))
+            if bestScore(countScore(correctLetters, secretWord)) < countScore(correctLetters, secretWord):
+                print('Congratulation! You renewed best record!')
+
             # Ask the player if they want to play again (but only if the game is done).
             if playAgain():
                 missedLetters = ''
                 correctLetters = ''
                 gameSucceeded = False
                 gameFailed = False
-                secretWord = getRandomWord(words)
+                secretWord = getRandomWord(readWordList())
                 continue 
             else: 
                 break
